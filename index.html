@@ -8,44 +8,25 @@
     body { margin: 0; font-family: system-ui, sans-serif; background: #f4f6f8; }
     header { background: #1f4e79; color: #fff; padding: 12px 20px; }
     header h1 { margin: 0; font-size: 1.2rem; }
-    nav { display: flex; gap: 8px; padding: 10px 20px; background: #fff; border-bottom: 1px solid #ddd; flex-wrap: wrap; }
-    nav button { padding: 8px 14px; border: 1px solid #1f4e79; background: #fff; color: #1f4e79; border-radius: 6px; cursor: pointer; }
-    nav button.active { background: #1f4e79; color: #fff; }
-    .open { margin-left: auto; align-self: center; font-size: 0.9rem; }
-    iframe { width: 100%; height: calc(100vh - 110px); border: 0; background: #fff; }
+    main { display: flex; gap: 16px; flex-wrap: wrap; padding: 40px 20px; justify-content: center; }
+    a.card {
+      display: block; width: 240px; padding: 28px 20px; text-align: center;
+      background: #fff; border: 1px solid #1f4e79; border-radius: 10px;
+      color: #1f4e79; text-decoration: none; font-size: 1.1rem; font-weight: 600;
+    }
+    a.card:hover { background: #1f4e79; color: #fff; }
+    a.card small { display: block; margin-top: 6px; font-weight: 400; font-size: 0.85rem; opacity: 0.8; }
   </style>
 </head>
 <body>
   <header><h1>Dua Dimensi – Aplikasi</h1></header>
-  <nav>
-    <button class="active" data-target="siswa">Siswa</button>
-    <button data-target="pengajar">Pengajar</button>
-    <a class="open" id="openNew" target="_blank" rel="noopener">Buka di tab baru ↗</a>
-  </nav>
-
-  <iframe id="frame" title="Aplikasi"></iframe>
-
-  <script>
-    const APPS = {
-      siswa: "https://script.google.com/macros/s/AKfycbyp9zjnOvYOpr6vc7-o9yZUixk7JL3omrDBgI4uURmGpKDtijjm1b4Yd5_9JwsPSuc9nw/exec",
-      pengajar: "https://script.google.com/macros/s/AKfycbyF0c6cR8FjZ6ljReW_H0kWl6jvkF_tXIhnQ99eYoKEYHPLhfrZ2ZKNfNlg2KooAOnNZA/exec"
-    };
-
-    const frame = document.getElementById("frame");
-    const openNew = document.getElementById("openNew");
-    const buttons = document.querySelectorAll("nav button");
-
-    function show(key) {
-      frame.src = APPS[key];
-      openNew.href = APPS[key];
-      buttons.forEach(b => b.classList.toggle("active", b.dataset.target === key));
-      history.replaceState(null, "", "#" + key);
-    }
-
-    buttons.forEach(b => b.addEventListener("click", () => show(b.dataset.target)));
-
-    const start = location.hash.replace("#", "");
-    show(APPS[start] ? start : "siswa");
-  </script>
+  <main>
+    <a class="card" href="https://script.google.com/macros/s/AKfycbyp9zjnOvYOpr6vc7-o9yZUixk7JL3omrDBgI4uURmGpKDtijjm1b4Yd5_9JwsPSuc9nw/exec" target="_blank" rel="noopener">
+      Siswa<small>Buka aplikasi siswa</small>
+    </a>
+    <a class="card" href="https://script.google.com/macros/s/AKfycbyF0c6cR8FjZ6ljReW_H0kWl6jvkF_tXIhnQ99eYoKEYHPLhfrZ2ZKNfNlg2KooAOnNZA/exec" target="_blank" rel="noopener">
+      Pengajar<small>Buka aplikasi pengajar</small>
+    </a>
+  </main>
 </body>
 </html>
