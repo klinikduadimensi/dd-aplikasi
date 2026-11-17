@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="awal">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -31,6 +31,7 @@
       display: grid; grid-template-columns: 1.1fr 1fr;
     }
     [hidden] { display: none !important; }
+    .awal *, .awal *::before { transition: none !important; }   /* tanpa animasi saat halaman baru dibuka */
 
     /* ---------- panel kiri (biru) ---------- */
     .side {
@@ -42,14 +43,24 @@
 
     /* animasi latar: blob biru muda yang bergerak pelan (satu-satunya animasi ambient).
        Berhenti saat form sedang diisi, dan diam untuk pengguna "kurangi animasi". */
-    .side > .ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .side > .ambient {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+      filter: url(#gooBesar); opacity: .24;   /* efek gooey; maks .24 supaya teks putih ≥4.5:1, judul biru muda ≥3:1 */
+    }
     .ambient span {
-      position: absolute; border-radius: 50%; filter: blur(48px); opacity: .22;   /* maks .22: teks putih tetap ≥4.5:1, judul biru muda ≥3:1 */
+      position: absolute; border-radius: 50%;
       background: #a5dbff; will-change: transform; animation: melayang 22s ease-in-out infinite alternate;
+    }
+    .ambient .a4 { width: 14%; aspect-ratio: 1; right: 22%; top: 20%; animation: tetes 14s ease-in-out infinite alternate; }
+    .ambient .a5 { width: 10%; aspect-ratio: 1; left: 12%; bottom: 22%; background: #6fb6f0; animation: tetes 17s ease-in-out infinite alternate-reverse; }
+    @keyframes tetes {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(-60%, -40%) scale(1.15); }
+      100% { transform: translate(40%, 70%) scale(.9); }
     }
     .ambient .a1 { width: 46%; aspect-ratio: 1; right: -10%; top: -14%; }
     .ambient .a2 { width: 34%; aspect-ratio: 1; left: -8%; bottom: -10%; background: #6fb6f0; animation-duration: 26s; animation-delay: -8s; }
-    .ambient .a3 { width: 26%; aspect-ratio: 1; right: 6%; bottom: -6%; opacity: .18; animation-duration: 30s; animation-delay: -14s; }
+    .ambient .a3 { width: 26%; aspect-ratio: 1; right: 6%; bottom: -6%; animation-duration: 30s; animation-delay: -14s; }
     @keyframes melayang {
       0%   { transform: translate(0, 0) scale(1); border-radius: 50% 46% 54% 50%; }
       50%  { transform: translate(-9%, 12%) scale(1.12); border-radius: 42% 58% 46% 54%; }
@@ -199,6 +210,8 @@
     }
     /* HP */
     @media (max-width: 600px) {
+      .side > div:not(.ambient) { text-align: center; display: flex; flex-direction: column; align-items: center; }
+      .side p.lead { max-width: 34ch; }
       body { background: #fff; }
       .side { padding: calc(26px + env(safe-area-inset-top)) 22px 70px; border-radius: 0 0 28px 28px; }
       .side h1 { font-size: 1.6rem; margin-top: 16px; }
@@ -289,7 +302,7 @@
 <body>
 
   <aside class="side">
-    <div class="ambient" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+    <div class="ambient" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span><span class="a4"></span><span class="a5"></span></div>
     <div>
       <div class="logo"><img src="https://lh3.googleusercontent.com/d/1dTrVKp_hcT0b8szBekawEW7E6EcxJ43a" alt="Logo Dua Dimensi" referrerpolicy="no-referrer"></div>
       <h1>Halo, Sobat <em>Dua Dimensi</em></h1>
@@ -344,6 +357,8 @@
     <p id="loaderTxt">Memuat…</p>
   </div>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <filter id="gooBesar" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceGraphic" stdDeviation="22" result="b"/>
+      <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -10"/></filter>
     <filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/>
       <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/></filter>
   </svg>
@@ -394,6 +409,7 @@
       b.addEventListener('click', function(){ pilihPeran(b.dataset.role); $('fId').focus(); });
     });
     pilihPeran(baca('ddPeran') === 'pengajar' ? 'pengajar' : 'siswa');
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ document.documentElement.classList.remove('awal'); }); });
 
     /* Aplikasi dimuat di dalam halaman ini, jadi alamat tetap aplikasi.duadimensi.my.id.
        #siswa / #pengajar di alamat = aplikasi yang sedang dibuka (tetap terbuka saat refresh). */
