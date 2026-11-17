@@ -111,6 +111,11 @@
     .foot { display: none; text-align: center; color: var(--muted); font-size: .78rem; margin-top: 28px; }
     .mlogo { display: none; }
 
+    /* ---------- aplikasi di dalam halaman ---------- */
+    #appFrame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; background: #fff; z-index: 50; }
+    body.app-on { overflow: hidden; }
+    body.app-on .side, body.app-on .main { display: none; }
+
     /* ---------- HP ---------- */
     @media (max-width: 860px) {
       body { display: block; background: #fff; }
@@ -178,6 +183,9 @@
     </form>
   </main>
 
+  <iframe id="appFrame" title="Aplikasi Dua Dimensi" hidden
+          allow="camera; geolocation; clipboard-write; fullscreen"></iframe>
+
   <script>
     var APPS = {
       siswa: {
@@ -222,6 +230,19 @@
     });
     pilihPeran(baca('ddPeran') === 'pengajar' ? 'pengajar' : 'siswa');
 
+    /* Aplikasi dimuat di dalam halaman ini, jadi alamat tetap aplikasi.duadimensi.my.id.
+       #siswa / #pengajar di alamat = aplikasi yang sedang dibuka (tetap terbuka saat refresh). */
+    function bukaApp(r, query){
+      var f = $('appFrame');
+      f.src = APPS[r].url + (query || '');
+      f.hidden = false;
+      document.body.classList.add('app-on');
+      document.title = (r === 'siswa' ? 'Siswa' : 'Pengajar') + ' – Dua Dimensi';
+      if (location.hash !== '#' + r) history.replaceState(null, '', '#' + r);
+    }
+    var awal = location.hash.replace('#', '');
+    if (APPS[awal]) bukaApp(awal, '');
+
     $('bLihat').addEventListener('click', function(){
       var p = $('fPw'), tampak = p.type === 'password';
       p.type = tampak ? 'text' : 'password'; this.textContent = tampak ? 'Tutup' : 'Lihat';
@@ -247,8 +268,9 @@
         .then(function(r){
           if (!r || !r.ok){ sibuk(false); tampilErr((r && r.pesan) || 'Gagal masuk.'); $('fPw').select(); return; }
           simpan('ddId_' + PERAN, id);
-          $('bMasuk').innerHTML = '<span class="spin"></span>Membuka aplikasi…';
-          window.location.href = a.url + '?masuk=' + encodeURIComponent(r.kode);
+          $('fPw').value = '';
+          bukaApp(PERAN, '?masuk=' + encodeURIComponent(r.kode));
+          sibuk(false);
         })
         .catch(function(){
           sibuk(false);
