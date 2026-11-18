@@ -478,7 +478,10 @@
       try { for (var i = 0; i < w.length; i++) siarkan(w[i], pesan); } catch(e){}
     }
     function umumkanPortal(){ siarkan($('appFrame').contentWindow, { dd: 'portal' }); }
-    $('appFrame').addEventListener('load', function(){ umumkanPortal(); setTimeout(umumkanPortal, 1500); });
+    $('appFrame').addEventListener('load', umumkanPortal);
+    /* Aplikasi siswa kadang baru siap setelah halaman induk selesai dimuat, jadi pengumuman diulang
+       tiap detik selama aplikasi terbuka. Pesan ini murah dan membuat jabat tangan tidak pernah terlewat. */
+    setInterval(function(){ if (!$('appFrame').hidden) umumkanPortal(); }, 1000);
 
     window.addEventListener('message', function(e){
       if (!GAS_ASAL.test(e.origin) || !e.data || typeof e.data !== 'object') return;
