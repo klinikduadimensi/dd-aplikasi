@@ -171,11 +171,42 @@
     @keyframes orbit2 { 0%,100% { transform: translate(26px,10px); } 50% { transform: translate(-22px,-14px); } }
     @keyframes orbit3 { 0%,100% { transform: translate(0,28px) scale(.8); } 50% { transform: translate(0,-30px) scale(1.1); } }
     .loader p { margin: 0; font-weight: 700; color: var(--primary); }
+
+    /* loading: blob biru + merah (warna logo) yang merayap ke kanan, menyatu dengan efek gooey */
+    .blobjalan{position:relative;width:100px;height:60px;filter:url(#gooJalan)}
+    .blobjalan i{position:absolute;top:50%;display:block;border-radius:50%}
+    .blobjalan .bj1{width:54px;height:54px;margin-top:-27px;left:4px;background:#0e58a6;animation:bjBiru 1.8s ease-in-out infinite}
+    .blobjalan .bj2{width:34px;height:34px;margin-top:-17px;left:14px;background:#d6312f;animation:bjMerah 1.8s ease-in-out infinite}
+    @keyframes bjMerah{0%{transform:translateX(0);opacity:0}10%{opacity:1}45%,86%{transform:translateX(44px);opacity:1}100%{transform:translateX(44px);opacity:0}}
+    @keyframes bjBiru{0%{transform:translateX(0);opacity:0}8%,38%{transform:translateX(0);opacity:1}72%,86%{transform:translateX(32px);opacity:1}100%{transform:translateX(32px);opacity:0}}
+    @media (prefers-reduced-motion:reduce){
+      .blobjalan i{animation:none !important;opacity:1}
+      .blobjalan .bj2{transform:translateX(30px)}
+    }
+    
     @media (prefers-reduced-motion: reduce) {
       .blob, .ambient span { animation: none !important; }
       .blob.b1 { transform: translate(-22px,-6px); } .blob.b2 { transform: translate(22px,6px); } .blob.b3 { transform: translate(0,-24px); }
       .loader, .lihat, .role button, .btn, .fld { transition: none !important; }
     }
+
+    /* ---------- pemindai QR (kamera dibuka oleh halaman ini, bukan di dalam bingkai Google) ---------- */
+    .scan { position: fixed; inset: 0; z-index: 70; background: #050b16; color: #fff; display: grid; grid-template-rows: auto 1fr auto; }
+    .scan[hidden] { display: none; }
+    .scan video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .scan .atas, .scan .bawah { position: relative; z-index: 2; padding: calc(16px + env(safe-area-inset-top)) 20px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      background: linear-gradient(to bottom, rgba(5,11,22,.85), rgba(5,11,22,0)); }
+    .scan .bawah { padding: 24px 20px calc(24px + env(safe-area-inset-bottom)); flex-direction: column; background: linear-gradient(to top, rgba(5,11,22,.9), rgba(5,11,22,0)); }
+    .scan .atas b { font-size: 1.05rem; }
+    .scan .tutup { height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.12); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+    .scan .bingkai { position: relative; z-index: 1; align-self: center; justify-self: center; width: min(70vw, 300px); aspect-ratio: 1; border-radius: 22px;
+      box-shadow: 0 0 0 100vmax rgba(5,11,22,.45); border: 3px solid #a5dbff; overflow: hidden; }
+    .scan .garis { position: absolute; left: 6%; right: 6%; height: 3px; top: 10%; border-radius: 3px; background: #a5dbff; box-shadow: 0 0 12px #a5dbff; animation: pindai 2s ease-in-out infinite alternate; }
+    @keyframes pindai { to { top: 88%; } }
+    .scan .pesan { text-align: center; max-width: 34ch; margin: 0; }
+    .scan .foto { height: 48px; padding: 0 22px; border-radius: 12px; border: 0; background: #fff; color: var(--primary); font: inherit; font-weight: 800; cursor: pointer; }
+    .scan .tutup:focus-visible, .scan .foto:focus-visible { outline: 3px solid #a5dbff; outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) { .scan .garis { animation: none; top: 50%; } }
 
     /* ---------- HP ---------- */
     /* PC lebar: isi panel kiri tidak melebar terlalu jauh */
@@ -353,15 +384,28 @@
   </main>
 
   <div class="loader" id="loader" role="status" aria-live="polite">
-    <div class="blobs" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+    <div class="blobjalan" aria-hidden="true"><i class="bj1"></i><i class="bj2"></i></div>
     <p id="loaderTxt">Memuat…</p>
   </div>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
     <filter id="gooBesar" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceGraphic" stdDeviation="22" result="b"/>
       <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -10"/></filter>
+    <filter id="gooJalan"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/><feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"/></filter>
     <filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/>
       <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/></filter>
   </svg>
+
+  <div class="scan" id="vScan" role="dialog" aria-modal="true" aria-labelledby="scanJudul" hidden>
+    <video id="vid" playsinline muted></video>
+    <div class="atas"><b id="scanJudul">Scan QR Presensi</b><button type="button" class="tutup" id="bTutupScan">Tutup</button></div>
+    <div class="bingkai" aria-hidden="true"><div class="garis"></div></div>
+    <div class="bawah">
+      <p class="pesan" id="scanMsg" role="status">Membuka kamera…</p>
+      <button type="button" class="foto" id="bFotoQr">Ambil foto QR</button>
+    </div>
+  </div>
+  <canvas id="cv" hidden></canvas>
+  <input type="file" id="fFoto" accept="image/*" capture="environment" hidden>
 
   <iframe id="appFrame" title="Aplikasi Dua Dimensi" hidden
           allow="camera; geolocation; clipboard-write; fullscreen"></iframe>
@@ -423,6 +467,114 @@
       document.title = (r === 'siswa' ? 'Siswa' : 'Pengajar') + ' – Dua Dimensi';
       if (location.hash !== '#' + r) history.replaceState(null, '', '#' + r);
     }
+    /* ================= PEMINDAI QR UNTUK APLIKASI SISWA =================
+       Aplikasi siswa (di dalam bingkai Google) meminta kamera/lokasi lewat pesan.
+       Halaman ini yang membuka kamera & GPS, lalu mengirim hasilnya kembali. */
+    var GAS_ASAL = /^https:\/\/[a-z0-9-]+-script\.googleusercontent\.com$/;
+    var peminta = null, stream = null, loop = null, detector, sibukBaca = false;
+
+    function siarkan(w, pesan){          // kirim ke semua bingkai di dalam aplikasi
+      try { w.postMessage(pesan, '*'); } catch(e){}
+      try { for (var i = 0; i < w.length; i++) siarkan(w[i], pesan); } catch(e){}
+    }
+    function umumkanPortal(){ siarkan($('appFrame').contentWindow, { dd: 'portal' }); }
+    $('appFrame').addEventListener('load', function(){ umumkanPortal(); setTimeout(umumkanPortal, 1500); });
+
+    window.addEventListener('message', function(e){
+      if (!GAS_ASAL.test(e.origin) || !e.data || typeof e.data !== 'object') return;
+      var d = e.data, balas = function(m){ try { e.source.postMessage(m, e.origin); } catch(x){} };
+      if (d.dd === 'halo') balas({ dd: 'portal' });
+      else if (d.dd === 'scan') { peminta = { win: e.source, asal: e.origin }; bukaScan(); }
+      else if (d.dd === 'lokasi') ambilLokasi().then(function(lok){ balas({ dd: 'lokasi', id: d.id, lok: lok }); });
+    });
+
+    function ambilLokasi(){
+      return new Promise(function(res){
+        if (!navigator.geolocation) return res(null);
+        navigator.geolocation.getCurrentPosition(function(p){
+          res({ lat: p.coords.latitude, lng: p.coords.longitude, akurasi: Math.round(p.coords.accuracy || 0) });
+        }, function(){ res(null); }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 20000 });
+      });
+    }
+    function muatJsQR(){
+      if (window.jsQR) return Promise.resolve();
+      return new Promise(function(ok, gagal){
+        var sc = document.createElement('script');
+        sc.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+        sc.onload = ok; sc.onerror = gagal; document.head.appendChild(sc);
+      });
+    }
+    try { detector = ('BarcodeDetector' in window) ? new BarcodeDetector({ formats: ['qr_code'] }) : null; } catch(e){ detector = null; }
+    function bacaQr(src, w, h){
+      var pakaiJs = function(){
+        return muatJsQR().then(function(){
+          var cv = $('cv'), sk = Math.min(1, 1000 / Math.max(w, h));
+          cv.width = Math.round(w * sk); cv.height = Math.round(h * sk);
+          var ctx = cv.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(src, 0, 0, cv.width, cv.height);
+          var img = ctx.getImageData(0, 0, cv.width, cv.height);
+          var r = jsQR(img.data, img.width, img.height, { inversionAttempts: 'attemptBoth' });
+          return r ? r.data : null;
+        });
+      };
+      if (detector) return detector.detect(src).then(function(b){ return b && b.length ? b[0].rawValue : pakaiJs(); }).catch(pakaiJs);
+      return pakaiJs();
+    }
+    function kirimQr(teks){
+      tutupScan();
+      if (!peminta) return;
+      var p = peminta;
+      loading('Mengambil lokasi HP…');
+      ambilLokasi().then(function(lok){
+        loading('');
+        p.win.postMessage({ dd: 'qr', teks: String(teks).slice(0, 300), lok: lok }, p.asal);
+      });
+    }
+    function bukaScan(){
+      muatJsQR().catch(function(){});
+      $('vScan').hidden = false; $('bTutupScan').focus();
+      $('scanMsg').textContent = 'Membuka kamera…';
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ kameraGagal(); return; }
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } }, audio: false })
+        .then(function(st){
+          stream = st; var v = $('vid'); v.srcObject = st; v.play();
+          $('scanMsg').textContent = 'Arahkan kamera ke QR di poster cabang';
+          loop = setInterval(function(){
+            if (sibukBaca || !v.videoWidth) return;
+            sibukBaca = true;
+            bacaQr(v, v.videoWidth, v.videoHeight).then(function(t){
+              sibukBaca = false;
+              if (t){ if (navigator.vibrate) navigator.vibrate(80); kirimQr(t); }
+            }).catch(function(){ sibukBaca = false; });
+          }, 300);
+        }).catch(kameraGagal);
+    }
+    function kameraGagal(){
+      $('scanMsg').textContent = 'Izin kamera ditolak atau tidak tersedia. Izinkan kamera untuk situs ini di pengaturan browser, atau tekan "Ambil foto QR".';
+    }
+    function tutupScan(){
+      clearInterval(loop); loop = null; sibukBaca = false;
+      if (stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; }
+      $('vid').srcObject = null; $('vScan').hidden = true;
+    }
+    $('bTutupScan').addEventListener('click', tutupScan);
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !$('vScan').hidden) tutupScan(); });
+    $('bFotoQr').addEventListener('click', function(){ $('fFoto').click(); });
+    $('fFoto').addEventListener('change', function(){
+      var f = this.files && this.files[0]; this.value = '';
+      if (!f) return;
+      var img = new Image(), url = URL.createObjectURL(f);
+      $('scanMsg').textContent = 'Membaca QR dari foto…';
+      img.onload = function(){
+        bacaQr(img, img.naturalWidth, img.naturalHeight).then(function(t){
+          URL.revokeObjectURL(url);
+          if (t) kirimQr(t);
+          else $('scanMsg').textContent = 'QR tidak terbaca. Pastikan seluruh kotak QR masuk foto dan tidak buram, lalu coba lagi.';
+        }).catch(function(){ $('scanMsg').textContent = 'Gagal membaca foto. Periksa internet lalu coba lagi.'; });
+      };
+      img.src = url;
+    });
+
     var awal = location.hash.replace('#', '');
     if (APPS[awal]) bukaApp(awal, '');
 
