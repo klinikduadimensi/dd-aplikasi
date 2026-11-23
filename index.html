@@ -429,7 +429,7 @@
     };
 
     function $(id){ return document.getElementById(id); }
-    function simpan(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
+    function simpan(k, v){ try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch(e){} }
     function baca(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
     document.querySelectorAll('.yr').forEach(function(e){ e.textContent = new Date().getFullYear(); });
 
@@ -457,7 +457,9 @@
 
     /* Aplikasi dimuat di dalam halaman ini, jadi alamat tetap aplikasi.duadimensi.my.id.
        #siswa / #pengajar di alamat = aplikasi yang sedang dibuka (tetap terbuka saat refresh). */
+    var APP_AKTIF = '';
     function bukaApp(r, query){
+      APP_AKTIF = r;
       var f = $('appFrame');
       loading('Membuka aplikasi ' + (r === 'siswa' ? 'siswa' : 'pengajar') + '…');
       f.onload = function(){ loading(''); };
@@ -466,6 +468,19 @@
       document.body.classList.add('app-on');
       document.title = (r === 'siswa' ? 'Siswa' : 'Pengajar') + ' – Dua Dimensi';
       if (location.hash !== '#' + r) history.replaceState(null, '', '#' + r);
+    }
+    /* Aplikasi minta login ulang (sesi habis / keluar): tutup bingkai, tampilkan form portal ini. */
+    function tutupApp(pesan){
+      var r = APP_AKTIF || PERAN;
+      simpan('ddTok_' + r, null);
+      APP_AKTIF = '';
+      var f = $('appFrame'); f.onload = null; f.hidden = true; f.src = 'about:blank';
+      document.body.classList.remove('app-on');
+      document.title = 'Masuk – Dua Dimensi';
+      history.replaceState(null, '', location.pathname + location.search);
+      loading(''); sibuk(false);
+      pilihPeran(r);
+      if (pesan) tampilErr(pesan);
     }
     /* ================= PEMINDAI QR UNTUK APLIKASI SISWA =================
        Aplikasi siswa (di dalam bingkai Google) meminta kamera/lokasi lewat pesan.
@@ -486,7 +501,9 @@
     window.addEventListener('message', function(e){
       if (!GAS_ASAL.test(e.origin) || !e.data || typeof e.data !== 'object') return;
       var d = e.data, balas = function(m){ try { e.source.postMessage(m, e.origin); } catch(x){} };
-      if (d.dd === 'halo') balas({ dd: 'portal' });
+      if (d.dd === 'halo') balas({ dd: 'portal', tok: APP_AKTIF === 'siswa' ? (baca('ddTok_siswa') || '') : '' });
+      else if (d.dd === 'token' && typeof d.tok === 'string' && d.tok.length < 600 && APP_AKTIF) simpan('ddTok_' + APP_AKTIF, d.tok);
+      else if (d.dd === 'perluLogin') tutupApp(typeof d.pesan === 'string' ? d.pesan.slice(0, 200) : '');
       else if (d.dd === 'scan') { peminta = { win: e.source, asal: e.origin }; bukaScan(); }
       else if (d.dd === 'lokasi') ambilLokasi().then(function(lok){ balas({ dd: 'lokasi', id: d.id, lok: lok }); });
     });
