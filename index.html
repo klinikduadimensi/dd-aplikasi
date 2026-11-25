@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Masuk – Dua Dimensi</title>
-  <meta name="description" content="Masuk ke aplikasi siswa dan pengajar Klinik Edukasi Dua Dimensi.">
+  <meta name="description" content="Masuk ke aplikasi siswa dan pengajar/staff Klinik Edukasi Dua Dimensi.">
   <meta name="theme-color" content="#0e58a6">
   <link rel="icon" href="https://lh3.googleusercontent.com/d/1dTrVKp_hcT0b8szBekawEW7E6EcxJ43a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -357,7 +357,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>Siswa
         </button>
         <button type="button" role="tab" data-role="pengajar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>Pengajar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>Pengajar/Staff
         </button>
       </div>
 
@@ -461,12 +461,12 @@
     function bukaApp(r, query){
       APP_AKTIF = r;
       var f = $('appFrame');
-      loading('Membuka aplikasi ' + (r === 'siswa' ? 'siswa' : 'pengajar') + '…');
+      loading('Membuka aplikasi ' + (r === 'siswa' ? 'siswa' : 'pengajar/staff') + '…');
       f.onload = function(){ loading(''); };
       f.src = APPS[r].url + (query || '');
       f.hidden = false;
       document.body.classList.add('app-on');
-      document.title = (r === 'siswa' ? 'Siswa' : 'Pengajar') + ' – Dua Dimensi';
+      document.title = (r === 'siswa' ? 'Siswa' : 'Pengajar/Staff') + ' – Dua Dimensi';
       if (location.hash !== '#' + r) history.replaceState(null, '', '#' + r);
     }
     /* Aplikasi minta login ulang (sesi habis / keluar): tutup bingkai, tampilkan form portal ini. */
